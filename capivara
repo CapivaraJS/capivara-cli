@@ -5,9 +5,12 @@ const ora = require('ora');
 const inquirer = require('inquirer');
 const exec = require('child_process').exec;
 const replace = require("replace");
+const version = require('./package.json').version;
+const getos = require('getos');
+const { getInstalledPath } = require('get-installed-path');
 
 prog
-.version('1.0.0')
+.version(version)
 .command('init',   'Crie um novo componente')
 .argument('[name]', 'Nome do componente')
 .action((args, options, logger) => {
@@ -78,6 +81,18 @@ const generate = (answers) => {
 }
 
 
-prog.parse(process.argv);
-
-
+getInstalledPath('renamer').then(pathRenamer => {
+    prog.parse(process.argv);
+}).catch(() => {
+    getos(function(e,os) {
+        let command = 'npm install renamer -g';
+        const spinner = ora(command).start();
+        if(JSON.stringify(os).os == 'linux'){
+            command = 'sudo ' + command;
+        }
+        exec(command, {maxBuffer: Infinity}, () => {
+            spinner.stop();
+            prog.parse(process.argv);
+        });        
+    });
+})
