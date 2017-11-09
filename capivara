@@ -46,7 +46,12 @@ const replaceComponente = (regex, replacement, dir) => {
     });
 }
 
-const captalize = (string) => string = string.charAt(0).toUpperCase() + string.slice(1);
+const captalize = (str) => {
+    let string = str.charAt(0).toUpperCase() + str.slice(1);
+    var regex = new RegExp(/([a-z])([A-Z])/g);
+    var replacement = "$1-$2";
+    return string.replace(regex, replacement);
+}
 
 const generate = (answers) => {
     answers.name = captalize(answers.name);
@@ -58,7 +63,7 @@ const generate = (answers) => {
         } else {
             replaceComponente('archetype', answers.name.toLowerCase(), `capivara-${answers.name.toLowerCase()}`);
             replaceComponente('project-name', answers.name.toLowerCase(), `capivara-${answers.name.toLowerCase()}`);
-            replaceComponente('ProjectName', answers.name, `capivara-${answers.name.toLowerCase()}`);
+            replaceComponente('ProjectName', `Capivara${answers.name}`, `capivara-${answers.name.toLowerCase()}`);
             exec(`renamer --find 'project-name' --replace '${answers.name.toLowerCase()}' '**'`, {maxBuffer: Infinity}, () => {});
             spinner.succeed(`Seu novo componente foi gerado com sucesso.`);
         }                    
