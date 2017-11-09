@@ -46,15 +46,21 @@ const replaceComponente = (regex, replacement, dir) => {
     });
 }
 
-const captalize = (str) => {
+const replaceAll = (str, needle, replacement) => str.split(needle).join(replacement);
+
+const getComponentName = (str) => {
     let string = str.charAt(0).toUpperCase() + str.slice(1);
     var regex = new RegExp(/([a-z])([A-Z])/g);
     var replacement = "$1-$2";
     return string.replace(regex, replacement);
 }
 
+const getClassName = (answers) => {
+    return `Capivara${replaceAll(answers.name, '-', '')}`;
+}
+
 const generate = (answers) => {
-    answers.name = captalize(answers.name);
+    answers.name = getComponentName(answers.name);
     const spinner = ora('Gerando componente...').start();
     exec(`git clone https://github.com/CapivaraJS/capivara-archetype.git capivara-${answers.name.toLowerCase()}`, {maxBuffer: Infinity}, 
     function (error, stdout, stderr) {     
@@ -63,7 +69,7 @@ const generate = (answers) => {
         } else {
             replaceComponente('archetype', answers.name.toLowerCase(), `capivara-${answers.name.toLowerCase()}`);
             replaceComponente('project-name', answers.name.toLowerCase(), `capivara-${answers.name.toLowerCase()}`);
-            replaceComponente('ProjectName', `Capivara${answers.name}`, `capivara-${answers.name.toLowerCase()}`);
+            replaceComponente('ProjectName', `${getClassName(answers)}`, `capivara-${answers.name.toLowerCase()}`);
             exec(`renamer --find 'project-name' --replace '${answers.name.toLowerCase()}' '**'`, {maxBuffer: Infinity}, () => {});
             spinner.succeed(`Seu novo componente foi gerado com sucesso.`);
         }                    
