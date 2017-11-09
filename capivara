@@ -1,0 +1,72 @@
+#!/usr/bin/env node
+
+const prog = require('caporal');
+const ora = require('ora');
+const inquirer = require('inquirer');
+const exec = require('child_process').exec;
+const replace = require("replace");
+
+prog
+.version('1.0.0')
+.command('init',   'Crie um novo componente')
+.argument('[name]', 'Nome do componente')
+.action((args, options, logger) => {
+
+    if(!args.name){
+        inquirer.prompt([
+            {
+                type: 'input',
+                message: 'Nome do componente..: ',
+                name: 'name',
+                validate: function(input){
+                    let done = this.async();
+                    if(!input){
+                        done('Por favor, preencha o nome do componente.');
+                        return;
+                    }
+                    done(null, true);
+                }
+            }
+        ]).then(answers => {
+            generate(answers);
+        })
+    }else{
+        generate(args);
+    }
+
+});
+
+const replaceComponente = (regex, replacement, dir) => {
+    replace({
+        regex: regex,
+        replacement: replacement,
+        paths: [dir],
+        recursive: true,
+        silent: true,
+    });
+}
+
+const captalize = (string) => string = string.charAt(0).toUpperCase() + string.slice(1);
+
+const generate = (answers) => {
+    answers.name = captalize(answers.name);
+    const spinner = ora('Gerando componente...').start();
+    exec(`git clone https://github.com/CapivaraJS/capivara-archetype.git capivara-${answers.name.toLowerCase()}`, {maxBuffer: Infinity}, 
+    function (error, stdout, stderr) {     
+        if (error !== null) {
+            spinner.fail(`Problemas ao gerar seu componente. \n ${error}`);            
+        } else {
+            replaceComponente('archetype', answers.name.toLowerCase(), `capivara-${answers.name.toLowerCase()}`);
+            replaceComponente('project-name', answers.name.toLowerCase(), `capivara-${answers.name.toLowerCase()}`);
+            replaceComponente('ProjectName', answers.name, `capivara-${answers.name.toLowerCase()}`);
+            exec(`renamer --find 'project-name' --replace '${answers.name.toLowerCase()}' '**'`, {maxBuffer: Infinity}, () => {});
+            spinner.succeed(`Seu novo componente foi gerado com sucesso.`);
+        }                    
+    });
+
+}
+
+
+prog.parse(process.argv);
+
+
