@@ -8,6 +8,7 @@ const replace = require("replace");
 const version = require('./package.json').version;
 const getos = require('getos');
 const { getInstalledPath } = require('get-installed-path');
+const fs = require('fs');
 
 prog
 .version(version)
@@ -62,6 +63,20 @@ const getClassName = (answers) => {
     return `Capivara${replaceAll(answers.name, '-', '')}`;
 }
 
+const deleteFolderRecursive = (path) => {
+    if (fs.existsSync(path)) {
+        fs.readdirSync(path).forEach(function(file, index){
+        var curPath = path + "/" + file;
+        if (fs.lstatSync(curPath).isDirectory()) {
+            deleteFolderRecursive(curPath);
+        } else {
+            fs.unlinkSync(curPath);
+        }
+        });
+        fs.rmdirSync(path);
+    }
+}
+
 const generate = (answers) => {
     answers.name = getComponentName(answers.name);
     const spinner = ora('Gerando componente...').start();
@@ -74,6 +89,7 @@ const generate = (answers) => {
             replaceComponente('project-name', answers.name.toLowerCase(), `capivara-${answers.name.toLowerCase()}`);
             replaceComponente('ProjectName', `${getClassName(answers)}`, `capivara-${answers.name.toLowerCase()}`);
             exec(`renamer --find 'project-name' --replace '${answers.name.toLowerCase()}' '**'`, {maxBuffer: Infinity}, () => {
+                deleteFolderRecursive(`capivara-${answers.name.toLowerCase()}/.git`);
                 spinner.succeed(`Seu novo componente foi gerado com sucesso.`);
                 process.exit();
             });            
