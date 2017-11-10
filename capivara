@@ -73,8 +73,10 @@ const generate = (answers) => {
             replaceComponente('archetype', answers.name.toLowerCase(), `capivara-${answers.name.toLowerCase()}`);
             replaceComponente('project-name', answers.name.toLowerCase(), `capivara-${answers.name.toLowerCase()}`);
             replaceComponente('ProjectName', `${getClassName(answers)}`, `capivara-${answers.name.toLowerCase()}`);
-            exec(`renamer --find 'project-name' --replace '${answers.name.toLowerCase()}' '**'`, {maxBuffer: Infinity}, () => {});
-            spinner.succeed(`Seu novo componente foi gerado com sucesso.`);
+            exec(`renamer --find 'project-name' --replace '${answers.name.toLowerCase()}' '**'`, {maxBuffer: Infinity}, () => {
+                spinner.succeed(`Seu novo componente foi gerado com sucesso.`);
+                process.exit();
+            });            
         }                    
     });
 
@@ -87,7 +89,7 @@ getInstalledPath('renamer').then(pathRenamer => {
     getos(function(e,os) {
         let command = 'npm install renamer -g';
         const spinner = ora(command).start();
-        if(JSON.stringify(os).os == 'linux'){
+        if(os.os == 'linux'){
             command = 'sudo ' + command;
         }
         exec(command, {maxBuffer: Infinity}, () => {
