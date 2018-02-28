@@ -90,14 +90,25 @@ const generate = (answers) => {
             replaceComponente('ProjectName', `${getClassName(answers)}`, `capivara-${answers.name.toLowerCase()}`);
             exec(`renamer --find 'project-name' --replace '${answers.name.toLowerCase()}' '**'`, {maxBuffer: Infinity}, () => {
                 deleteFolderRecursive(`capivara-${answers.name.toLowerCase()}/.git`);
-                spinner.succeed(`Seu novo componente foi gerado com sucesso.`);
-                process.exit();
+                executeNpmInstall(spinner, answers);
             });            
         }                    
     });
 
 }
 
+const executeNpmInstall = (spinner, answers) => {
+    spinner.text = 'npm install';
+    exec(`cd capivara-${answers.name.toLowerCase()} && npm install`, {maxBuffer: Infinity}, () => {
+        spinner.stop();
+        finish(spinner);
+    }); 
+}
+
+const finish = (spinner) => {
+    spinner.succeed(`Seu novo componente foi gerado com sucesso.`);
+    process.exit();
+}
 
 getInstalledPath('renamer').then(pathRenamer => {
     prog.parse(process.argv);
