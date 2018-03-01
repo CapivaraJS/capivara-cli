@@ -1,6 +1,6 @@
 {
   "name": "capivara-cli",
-  "version": "1.13.0",
+  "version": "1.14.0",
   "description": "Capivara CLI",
   "main": "capivara",
   "scripts": {},
