@@ -9,7 +9,7 @@ const version = require('./package.json').version;
 const getos = require('getos');
 const { getInstalledPath } = require('get-installed-path');
 const fs = require('fs');
-
+const BASE_COMPONENT_NAME = "cp";
 
 
 console.log('   ____            _                          _ ____  ');
@@ -89,16 +89,16 @@ const deleteFolderRecursive = (path) => {
 const generate = (answers) => {
     answers.name = getComponentName(answers.name);
     const spinner = ora('Gerando componente...').start();
-    exec(`git clone https://github.com/CapivaraJS/capivara-archetype.git capivara-${answers.name.toLowerCase()}`, {maxBuffer: Infinity}, 
+    exec(`git clone https://github.com/CapivaraJS/capivara-archetype.git ${BASE_COMPONENT_NAME}-${answers.name.toLowerCase()}`, {maxBuffer: Infinity}, 
     function (error, stdout, stderr) {     
         if (error !== null) {
             spinner.fail(`Problemas ao gerar seu componente. \n ${error}`);            
         } else {
-            replaceComponente('archetype', answers.name.toLowerCase(), `capivara-${answers.name.toLowerCase()}`);
-            replaceComponente('project-name', answers.name.toLowerCase(), `capivara-${answers.name.toLowerCase()}`);
-            replaceComponente('ProjectName', `${getClassName(answers)}`, `capivara-${answers.name.toLowerCase()}`);
+            replaceComponente('archetype', answers.name.toLowerCase(), `${BASE_COMPONENT_NAME}-${answers.name.toLowerCase()}`);
+            replaceComponente('project-name', answers.name.toLowerCase(), `${BASE_COMPONENT_NAME}-${answers.name.toLowerCase()}`);
+            replaceComponente('ProjectName', `${getClassName(answers)}`, `${BASE_COMPONENT_NAME}-${answers.name.toLowerCase()}`);
             exec(`renamer --find 'project-name' --replace '${answers.name.toLowerCase()}' '**'`, {maxBuffer: Infinity}, () => {
-                deleteFolderRecursive(`capivara-${answers.name.toLowerCase()}/.git`);
+                deleteFolderRecursive(`${BASE_COMPONENT_NAME}-${answers.name.toLowerCase()}/.git`);
                 executeNpmInstall(spinner, answers);
             });            
         }                    
@@ -108,8 +108,9 @@ const generate = (answers) => {
 
 const executeNpmInstall = (spinner, answers) => {
     spinner.text = 'npm install';
-    exec(`cd capivara-${answers.name.toLowerCase()} && npm install`, {maxBuffer: Infinity}, () => {
+    exec(`npm set progress=false && cd ${BASE_COMPONENT_NAME}-${answers.name.toLowerCase()} && npm install`, {maxBuffer: Infinity}, () => {
         spinner.stop();
+        exec(`npm set progress=true`, {maxBuffer: Infinity}, () => {});
         finish(spinner);
     }); 
 }
