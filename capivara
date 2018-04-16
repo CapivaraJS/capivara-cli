@@ -94,20 +94,25 @@ const generate = (answers) => {
         if (error !== null) {
             spinner.fail(`Problemas ao gerar seu componente. \n ${error}`);            
         } else {
+            spinner.succeed();
             replaceComponente('archetype', answers.name.toLowerCase(), `${BASE_COMPONENT_NAME}-${answers.name.toLowerCase()}`);
             replaceComponente('project-name', answers.name.toLowerCase(), `${BASE_COMPONENT_NAME}-${answers.name.toLowerCase()}`);
             replaceComponente('ProjectName', `${getClassName(answers)}`, `${BASE_COMPONENT_NAME}-${answers.name.toLowerCase()}`);
-            exec(`renamer --find 'project-name' --replace '${answers.name.toLowerCase()}' '**'`, {maxBuffer: Infinity}, () => {
-                deleteFolderRecursive(`${BASE_COMPONENT_NAME}-${answers.name.toLowerCase()}/.git`);
-                executeNpmInstall(spinner, answers);
+            exec(`renamer --find 'project-name' --replace '${answers.name.toLowerCase()}' '**'`, {maxBuffer: Infinity}, (error, stdout, stderr) => {
+                if(error != null){
+                    spinner.fail('Falha ao gerar o componente! \n Error: ', error);
+                }else{
+                    deleteFolderRecursive(`${BASE_COMPONENT_NAME}-${answers.name.toLowerCase()}/.git`);
+                    executeNpmInstall(answers);
+                }
             });            
         }                    
     });
 
 }
 
-const executeNpmInstall = (spinner, answers) => {
-    spinner.text = 'npm install';
+const executeNpmInstall = (answers) => {
+    const spinner = ora('npm install').start();
     exec(`npm set progress=false && cd ${BASE_COMPONENT_NAME}-${answers.name.toLowerCase()} && npm install`, {maxBuffer: Infinity}, () => {
         spinner.stop();
         exec(`npm set progress=true`, {maxBuffer: Infinity}, () => {});
