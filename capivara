@@ -21,7 +21,7 @@ console.log('            |_|                                       ');
 
 prog
 .version(version)
-.command('init',   'Crie um novo componente')
+.command('init',   'Inicia um novo componente')
 .argument('[name]', 'Nome do componente')
 .action((args, options, logger) => {
 
