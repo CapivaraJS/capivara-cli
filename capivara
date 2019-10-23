@@ -34,7 +34,7 @@ prog
                 validate: function(input){
                     let done = this.async();
                     if(!input){
-                        done('Por favor, preencha o nome do componente.');
+                        done('Por favor, preencha o nome do seu componente.');
                         return;
                     }
                     done(null, true);
